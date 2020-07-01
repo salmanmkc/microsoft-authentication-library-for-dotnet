@@ -133,7 +133,7 @@ namespace NetCoreTestApp
 
                         case 4: // acquire token interactive with custom web ui
 
-                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                            authTask = pca.AcquireTokenInteractive(s_scopes).WithPrompt(Prompt.SelectAccount)
                                 .WithCustomWebUi(new DefaultOsBrowserWebUi()) // make sure you've configured a redirect uri of "http://localhost" or "http://localhost:1234" in the _pca builder
                                 .ExecuteAsync(CancellationToken.None);
 
@@ -150,7 +150,7 @@ namespace NetCoreTestApp
                             };
 
                             var cts = new CancellationTokenSource();
-                            authTask = pca.AcquireTokenInteractive(s_scopes)
+                            authTask = pca.AcquireTokenInteractive(s_scopes).WithPrompt(Prompt.SelectAccount)
                                 .WithSystemWebViewOptions(options)
                                 .ExecuteAsync(cts.Token);
 

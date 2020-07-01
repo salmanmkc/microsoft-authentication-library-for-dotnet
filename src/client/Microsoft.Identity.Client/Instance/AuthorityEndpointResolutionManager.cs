@@ -43,8 +43,7 @@ namespace Microsoft.Identity.Client.Instance
 
             var validator = AuthorityValidatorFactory.Create(authorityInfo, _serviceBundle);
 
-            // TODO: move this away from here?
-            await validator.ValidateAuthorityAsync(authorityInfo, requestContext).ConfigureAwait(false);
+            await validator.ValidateAuthorityAsync(authorityInfo, requestContext, userPrincipalName).ConfigureAwait(false);
 
             //TODO: stop using AuthorityInfo on its own
             var authority = Authority.CreateAuthority(authorityInfo);

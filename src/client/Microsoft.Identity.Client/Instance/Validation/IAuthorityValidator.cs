@@ -13,6 +13,7 @@ namespace Microsoft.Identity.Client.Instance.Validation
         /// </summary>
         Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo,
-            RequestContext requestContext);
+            RequestContext requestContext,
+            string userPrincipalName = "");
     }
 }

@@ -11,7 +11,8 @@ namespace Microsoft.Identity.Client.Instance.Validation
         /// <inheritdoc />
         public Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo,
-            RequestContext requestContext)
+            RequestContext requestContext,
+            string userPrincipalName = "")
         {
             return Task.FromResult(0);
         }

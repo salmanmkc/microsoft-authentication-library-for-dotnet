@@ -12,6 +12,8 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Guid = System.Guid;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Instance.Validation;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -23,7 +25,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     public class AdfsAuthorityTests : TestBase
     {
         [TestMethod]
-        [Ignore]
         public void SuccessfulValidationUsingOnPremiseDrsTest()
         {
             using (var harness = CreateTestHarness())
@@ -39,9 +40,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                             {"api-version", "1.0"}
                         },
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
+                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("drs-response.json")))
                     });
-
 
                 // add mock response for on-premise webfinger request
                 harness.HttpManager.AddMockHandler(
@@ -57,18 +57,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage()
                     });
 
-                // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
-                        ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(
-                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
-                    });
-
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -78,12 +67,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token", endpoints.TokenEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token", endpoints.SelfSignedJwtAudience);
 
                 // attempt to do authority validation again. NO network call should be made
-                instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
+                instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -93,14 +82,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token", endpoints.TokenEndpoint);
             }
         }
 
         [TestMethod]
-        [Ignore]
+        //[Ignore]
         public void SuccessfulValidationUsingCloudDrsFallbackTest()
         {
             using (var harness = CreateTestHarness())
@@ -128,8 +116,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         {
                             {"api-version", "1.0"}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
+                            ResourceHelper.GetTestResourceRelativePath("drs-response.json")))
                     });
 
 
@@ -147,18 +135,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage()
                     });
 
-                // add mock response for tenant endpoint discovery
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ExpectedUrl = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
-                        ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(
-                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
-                    });
-
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -169,9 +146,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token", endpoints.TokenEndpoint);
+                //Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
             }
         }
 
@@ -202,14 +179,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     new RequestContext(harness.ServiceBundle, Guid.NewGuid()))
                     .GetAwaiter().GetResult();
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token", endpoints.TokenEndpoint);
+                //Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
             }
         }
 
         [TestMethod]
-        [Ignore]
+        //[Ignore]
         public void FailedValidationTest()
         {
             using (var harness = CreateTestHarness())
@@ -224,8 +201,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         {
                             {"api-version", "1.0"}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
+                            ResourceHelper.GetTestResourceRelativePath("drs-response.json")))
                     });
 
 
@@ -243,7 +220,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "not-found")
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
@@ -265,7 +242,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [Ignore]
+        //[Ignore]
         public void FailedValidationResourceNotInTrustedRealmTest()
         {
             using (var harness = CreateTestHarness())
@@ -280,8 +257,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         {
                             {"api-version", "1.0"}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
+                            ResourceHelper.GetTestResourceRelativePath("drs-response.json")))
                     });
 
 
@@ -299,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.some-other-sts.com")
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try
@@ -320,7 +297,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         }
 
         [TestMethod]
-        [Ignore]
+        //[Ignore]
         public void FailedValidationMissingFieldsInDrsResponseTest()
         {
             using (var harness = CreateTestHarness())
@@ -336,11 +313,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                             {"api-version", "1.0"}
                         },
                         ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(
-                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response-missing-field.json")))
+                            MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
+                                ResourceHelper.GetTestResourceRelativePath("drs-response-missing-field.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);
+                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 try
@@ -372,8 +349,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         ExpectedMethod = HttpMethod.Get,
                         ExpectedUrl = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-MissingFields-OnPremise.json")))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(
+                            ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-MissingFields-OnPremise.json")))
                     });
 
                 Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority);

@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
                         if (!string.IsNullOrWhiteSpace(response.Body))
                         {
-                            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+                            var msalTokenResponse = JsonHelper.DeserializeFromJson<OAuth2ResponseBase>(response.Body);
                             if (msalTokenResponse != null)
                             {
                                 httpEvent.OauthErrorCode = msalTokenResponse?.Error;
@@ -187,14 +187,17 @@ namespace Microsoft.Identity.Client.OAuth2
             }
         }
 
-        public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext)
+        public static T CreateResponse<T>(HttpResponse response, RequestContext requestContext, bool addCorrelationId = true)
         {
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 ThrowServerException(response, requestContext);
             }
 
-            VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
+            if (addCorrelationId)
+            {
+                VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
+            }
 
             return JsonHelper.DeserializeFromJson<T>(response.Body);
         }

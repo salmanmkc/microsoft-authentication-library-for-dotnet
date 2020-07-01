@@ -24,7 +24,8 @@ namespace Microsoft.Identity.Client.Instance.Validation
         /// </summary>
         public async Task ValidateAuthorityAsync(
             AuthorityInfo authorityInfo,
-            RequestContext requestContext)
+            RequestContext requestContext,
+            string userPrincipalName = "")
         {
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
             if (authorityInfo.ValidateAuthority && !KnownMetadataProvider.IsKnownEnvironment(authorityUri.Host))
