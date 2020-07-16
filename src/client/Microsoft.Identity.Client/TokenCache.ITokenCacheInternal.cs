@@ -39,7 +39,15 @@ namespace Microsoft.Identity.Client
             bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AuthorityType.Adfs;
             string preferredUsername = GetPreferredUsernameFromIdToken(isAdfsAuthority, idToken);
             string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
-            string homeAccountId = GetHomeAccountId(requestParams, response, idToken);
+            string homeAccountId;
+            if (requestParams.AuthorityInfo.AuthorityType == AuthorityType.B2C)
+            {
+                homeAccountId = GetB2CHomeAccountId(requestParams, response, idToken);
+            }
+            else
+            {
+                homeAccountId = GetHomeAccountId(requestParams, response, idToken);
+            }
             string suggestedWebCacheKey = SuggestedWebCacheKeyFactory.GetKeyFromResponse(requestParams, homeAccountId);
 
             // Do a full instance discovery when saving tokens (if not cached),
@@ -214,6 +222,19 @@ namespace Microsoft.Identity.Client
 
             ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
             string homeAccountId = clientInfo?.ToAccountIdentifier() ?? subject; // ADFS does not have client info, so we use subject
+            return homeAccountId;
+        }
+
+        private static string GetB2CHomeAccountId(AuthenticationRequestParameters requestParams, MsalTokenResponse response, IdToken idToken)
+        {
+            string objectId = idToken?.ObjectId;
+            if (idToken?.ObjectId != null)
+            {
+                requestParams.RequestContext.Logger.Info("Object Id not present in AAD B2C Id token");
+            }
+
+            ClientInfo clientInfo = response.ClientInfo != null ? ClientInfo.CreateFromJson(response.ClientInfo) : null;
+            string homeAccountId = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", objectId, clientInfo.UniqueTenantIdentifier);
             return homeAccountId;
         }
 
