@@ -12,6 +12,7 @@ using Microsoft.Identity.Client.AuthScheme;
 using Microsoft.Identity.Client.Internal;
 using System.Net.Http;
 using Microsoft.Identity.Client.AuthScheme.PoP;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
@@ -410,6 +411,20 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
+#if NET_CORE
+        /// <summary>
+        /// Sets the product id to be used in the authentication request header for telemetry purposes.
+        /// </summary>
+        /// <param name="productId">product id of the origin of the authentication request</param>
+        /// <returns></returns>
+        public T WithProductId(string productId)
+        {
+            CommonParameters.UserProvidedProductId = string.Format(CultureInfo.InvariantCulture, "MSAL.NetCore.{0}", productId);
+            CommonParameters.UseProductIdFromUser = true;
+            return (T)this;
+        }
+#endif
+
         /// <summary>
         /// Validates the parameters of the AcquireToken operation.
         /// </summary>
@@ -423,6 +438,9 @@ namespace Microsoft.Identity.Client
             CommonParameters.ApiId = CalculateApiEventId();
             CommonParameters.ApiTelemId = ApiTelemetryId;
             CommonParameters.CorrelationId = CommonParameters.UseCorrelationIdFromUser ? CommonParameters.UserProvidedCorrelationId : Guid.NewGuid();
+#if NET_CORE
+            CommonParameters.ProductId = CommonParameters.UseProductIdFromUser ? CommonParameters.UserProvidedProductId : "MSAL.NetCore";
+#endif
         }
     }
 }

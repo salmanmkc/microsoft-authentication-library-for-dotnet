@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
             IsBrokerConfigured = serviceBundle.Config.IsBrokerEnabled;
+            ProductId = _commonParameters.ProductId;
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
@@ -83,7 +84,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
        
         public IDictionary<string, string> ExtraQueryParameters { get; }
 
-        public string ClaimsAndClientCapabilities { get; private set; }    
+        public string ClaimsAndClientCapabilities { get; private set; }   
+        
+        public string ProductId { get; set; }
 
         /// <summary>
         /// Indicates if the user configured claims via .WithClaims. Not affected by Client Capabilities

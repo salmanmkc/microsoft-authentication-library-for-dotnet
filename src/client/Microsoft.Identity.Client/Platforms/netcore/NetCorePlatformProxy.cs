@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         protected override string InternalGetProductName()
         {
-            return "MSAL.NetCore";
+            return null;
         }
 
         /// <summary>

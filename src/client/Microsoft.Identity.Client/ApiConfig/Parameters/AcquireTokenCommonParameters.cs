@@ -22,6 +22,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
+        public string ProductId { get; set; } // only available on net core
+        public string UserProvidedProductId { get; set; }
+        public bool UseProductIdFromUser { get; set; }
         public ApiTelemetryId ApiTelemId { get; set; } = ApiTelemetryId.Unknown;
 
         public IAuthenticationScheme AuthenticationScheme { get; set; } = new BearerAuthenticationScheme();

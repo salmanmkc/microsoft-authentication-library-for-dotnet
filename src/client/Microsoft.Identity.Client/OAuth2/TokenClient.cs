@@ -113,7 +113,6 @@ namespace Microsoft.Identity.Client.OAuth2
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientId, _requestParams.ClientId);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
 
-
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
             if (_requestParams.ClientCredential != null)
             {
@@ -130,6 +129,10 @@ namespace Microsoft.Identity.Client.OAuth2
                     _oAuth2Client.AddBodyParameter(entry.Key, entry.Value);
                 }
             }
+#endif
+
+#if NET_CORE
+            _oAuth2Client.AddHeader(MsalIdParameter.Product, _requestParams.ProductId);
 #endif
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Scope, scopes);
             _oAuth2Client.AddBodyParameter(OAuth2Parameter.Claims, _requestParams.ClaimsAndClientCapabilities);
