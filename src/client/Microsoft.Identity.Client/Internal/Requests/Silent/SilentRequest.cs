@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests.Silent
             {
                 if (AuthenticationRequestParameters.Account != null)
                 {
-                    _logger.Verbose("Attempting to acquire token using using local cache...");
+                    _logger.Verbose("Attempting to acquire token using local cache...");
                     return await _clientStrategy.ExecuteAsync(cancellationToken).ConfigureAwait(false);
                 }
 
